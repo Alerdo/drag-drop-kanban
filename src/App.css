@@ -1,25 +1,93 @@
+
+.title  {
+ padding-left: 400px;
+
+}
+
+.process-screen {
+  padding-left: 600px;
+}
+
 .container {
+  border: 1px solid purple;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 100%;
+  width: fit-content;
+}
+
+.columns-container {
   display: flex;
   justify-content: center;
+  border: 1px solid green;
+  width: auto;
+}
+
+
+.column {
+  background-color: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start; /* The column name will stay at the top , becase of flex start , will do the same for empty columns because they .items will have same height*/
+  border: 1px solid blue;
+  margin: 5px;
+  flex: 1;
+  max-height: fit-content;
+}
+
+
+
+
+.items {
+  background-color: #f9f9f9;
+  /* width: ; */
+  display: flex;
+  min-width: 150px; /* This is just an example to put a min width on each column ..*/
+  flex-direction: column;
   align-items: center;
-  height: 100vh;
+  justify-content: flex-start;
+  border: 1px solid rgb(255, 255, 0);
+  margin: 5px;
+  height: auto;
+  flex: 1; /* this is nesecasry for the empty items array  */
+}
+
+
+.items > :last-child { /* This is just an example to put a min width on each column .. so the handler(handleDropOnExisting ) for the item will work instead of the handler for the column*/
+  /* padding-bottom: 120%; */
+  border: 1px solid red;
+  margin-bottom: 0px;
+}
+.column-name {
+  background-color: rgb(42, 174, 39);
+  color: white;
+  width: 100%;
+  text-align: center;
+  padding: 3px 0px;
+}
+
+
+
+
+.item-container {
+  min-height: 50px;
+  display: flex;
+  justify-content: center;
+  padding: 10px;
 }
 
 .draggable-item {
   background-color: #f0f0f0;
   border: 1px solid #ddd;
-  padding: 10px;
+  padding: 15px;
   margin: 5px;
+  font-size: 13px;
   cursor: pointer;
+  width: 60%;
 }
 
-.droppable-zone {
-  background-color: #f9f9f9;
-  border: 2px dashed #aaa;
-  padding: 15px;
-  margin: 20px auto;
-  width: 300px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+
+
+
