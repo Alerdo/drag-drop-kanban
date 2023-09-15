@@ -5,70 +5,147 @@ import './App.css';
 
 
 
+const DraggableItem = ({ item, colIndex, index, onDragStart, updateAttachments, updateItemField }) => {
 
-
-const DraggableItem = ({ item, colIndex, index, onDragStart }) => {
-  const [attachments, setAttachments] = useState({});
+  
+  const [showAttachments, setShowAttachments] = useState(false);
   const fileInputRef = useRef(null);
 
   const handleUpload = (file) => {
-    if (!item?.attachments) {
-      item.attachments = [];
-    }
+    if (item.attachments.length < 6) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const truncatedName = file.name.length > 20 ? file.name.substring(0, 20) + "..." : file.name;
 
-    if (item?.attachments?.length < 6) {
-      const newFile = {
-        id: `File ${item.attachments.length + 1}`,
-        name: file.name
-      };
-      item.attachments.push(newFile);
-      setAttachments(prev => ({ ...prev, [newFile.id]: newFile.name }));
+            const newFile = {
+                id: `File ${item.attachments.length + 1}`,
+                name: truncatedName,
+                data: reader.result  // This is the Data URL
+            };
+            updateAttachments(colIndex, index, [...item.attachments, newFile]);
+        }
+        reader.readAsDataURL(file);
     }
+};
+
+
+  const handleDeleteAttachment = (attachmentIndex) => {
+    const updatedAttachments = item.attachments.filter((_, idx) => idx !== attachmentIndex);
+    updateAttachments(colIndex, index, updatedAttachments);
+  };
+
+  const handleChange = (field, value) => {
+    updateItemField(colIndex, index, field, value);
   };
 
   const triggerFileInput = () => {
     fileInputRef.current.click();
   };
 
-  return (
-    <div
-      className="draggable-item"
-      draggable
-      onDragStart={(e) => onDragStart(e, colIndex, index)}
-    >
-      <input value={item?.stockName || ''} disabled placeholder="Stock Name" />
-      <input type="date" value={item?.createdDate || ''} disabled />
-      <input type="date" value={item?.dueDate || ''} disabled />
-      <input value={item?.primaryAnalyst || ''} disabled placeholder="Primary Analyst" />
-      <input value={item?.secondaryAnalyst || ''} placeholder="Secondary Analyst" />
+  const formatDate = (date) => {
+    const dd = String(date.getDate()).padStart(2, '0');
+    const mm = String(date.getMonth() + 1).padStart(2, '0'); 
+    const yyyy = date.getFullYear();
+    return yyyy + '-' + mm + '-' + dd;
+  }
 
-      {/* Attached Files List */}
-      <div>
-        <button  style={{ cursor: "default" }}>Attached Files</button>
-         <ul>
-         {item?.attachments?.map(({ id, name }) => (
-            <li key={id}>{id}: {name}</li>
-          ))}
-         </ul>
+
+  const handleEditingDone = () => { 
+    updateItemField(colIndex, index, 'edited', true);
+  };
+
+  return (
+    <div className="draggable-item" draggable onDragStart={(e) => onDragStart(e, colIndex, index)}>
+      <div className="label-input-group stock-name">
+        <label>Stock Name:</label>
+        <input 
+          value={item?.stockName || ''}
+          onChange={(e) => handleChange('stockName', e.target.value)}
+          disabled={item.edited}
+          placeholder="Stock Name" />
       </div>
 
-      {/* Attach New File */}
-      {Object.keys(attachments).length < 6 && (
-        <div>
-          <button onClick={triggerFileInput}>Click to Attach File</button>
-          <input 
-            type="file" 
-            style={{ display: 'none' }} 
-            onChange={(e) => e.target.files[0] && handleUpload(e.target.files[0])}
-            ref={fileInputRef} 
-          />
-        </div>
+      <div className="label-input-group">
+        <label>Created Date:</label>
+        <input 
+            type="date"
+            value={formatDate(new Date(item?.createdDate))}
+            disabled={item.edited}
+            onChange={(e) => handleChange('createdDate', e.target.value)}
+        />
+      </div>
+
+      <div className="label-input-group due-date">
+        <label>Due Date:</label>
+        <input 
+            type="date"
+            value={formatDate(new Date(item?.dueDate))}
+            disabled={item.edited}
+            onChange={(e) => handleChange('dueDate', e.target.value)}
+        />
+      </div>
+
+      <div className="label-input-group">
+        <label>Primary Analyst:</label>
+        <input 
+          value={item?.primaryAnalyst || ''}
+          onChange={(e) => handleChange('primaryAnalyst', e.target.value)}
+          disabled={item.edited}
+          placeholder="Primary Analyst" 
+        />
+      </div>
+
+      <div className="label-input-group">
+        <label>Secondary Analyst:</label>
+        <input 
+          value={item?.secondaryAnalyst || ''}
+          onChange={(e) => handleChange('secondaryAnalyst', e.target.value)}
+          placeholder="Secondary Analyst" 
+        />
+      </div>
+
+      {!item.edited && (
+        <button onClick={handleEditingDone}>Done Editing</button>
       )}
+
+      <div>
+        <button style={{ cursor: 'pointer' }} onClick={() => setShowAttachments(!showAttachments)}>
+          {showAttachments ? 'Hide' : 'Show'} Attached Files
+        </button>
+        {showAttachments && (
+          <>
+            <ul>
+        {item.attachments.map(({ id, name, data }, attachmentIndex) => (
+          <li key={id}>
+            <a href={data} download={name}>{id}: {name}</a> {/* This allows downloading the file */}
+            { (
+              <button onClick={() => handleDeleteAttachment(attachmentIndex)}>Delete</button>
+            )}
+          </li>
+        ))}
+      </ul>
+
+
+
+            { item.attachments.length < 6 && (
+              <div>
+                <button onClick={triggerFileInput}>Click to Add Files</button>
+                <input
+                  type="file"
+                  style={{ display: 'none' }}
+                  onChange={(e) => e.target.files[0] && handleUpload(e.target.files[0])}
+                  ref={fileInputRef}
+                />
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 };
 
-
+ /* FINISH DRAGABLE ITEM  */
 
 
 
@@ -101,10 +178,7 @@ const DroppableZone = ({ columnName, columns, setColumns, handleDragStart }) => 
     setColumns(newColumns);
   };
 
-  const handleDragOver = (e) => {
-    e.preventDefault();
-  };
-
+ 
 
   const handleAddNewCard = (colIndex) => {
     const newColumns = [...columns];
@@ -114,27 +188,51 @@ const DroppableZone = ({ columnName, columns, setColumns, handleDragStart }) => 
       dueDate: new Date(),
       primaryAnalyst: "",
       secondaryAnalyst: "",
-      attachments: [] 
+      attachments: [],
+      edited: false
     };
-    
     newColumns[colIndex].push(newCard);
     setColumns(newColumns);
   };
   
 
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+
+  const updateAttachments = (colIndex, itemIndex, newAttachments) => {
+    setColumns(prevColumns => {
+        const updatedColumns = [...prevColumns];
+        updatedColumns[colIndex][itemIndex].attachments = newAttachments;
+        return updatedColumns;
+    });
+};
+
+
+const updateItemField = (colIndex, itemIndex, field, value) => { //used to change one value of a certian propertie 
+  setColumns(prevColumns => {
+      const updatedColumns = [...prevColumns];
+      updatedColumns[colIndex][itemIndex][field] = value;
+      return updatedColumns;
+  });
+};
  
+
   return (
     <div className="columns-container">
-      {columns.map((colItems, colIndex) => (
+      {columns.map((colItems, colIndex) => ( //Iterating over all columns 
         <div key={colIndex} className="column">
           <div className="column-name">{(colIndex + 1) + ". "}{columnName[colIndex]}</div>
           {colIndex === 0 && ( <button onClick={() => handleAddNewCard(colIndex)}>+</button>)}  {/*Making sure this button shows for the first column only*/}
-          <div
+          
+          
+          <div 
             className="items"
             onDrop={(e) => handleDropOnEmpty(e, colIndex)}
             onDragOver={handleDragOver}
           >
-            {colItems.map((item, index) => (
+            {colItems.map((item, index) => ( //Iterating over each column (each array)
               <div
                 key={index} 
                 onDrop={(e) => handleDropOnExisting(e, colIndex, index)}
@@ -146,10 +244,13 @@ const DroppableZone = ({ columnName, columns, setColumns, handleDragStart }) => 
                   colIndex={colIndex}
                   index={index}
                   onDragStart={handleDragStart}
+                  updateAttachments={updateAttachments}
+                  updateItemField={updateItemField}
                 />
               </div>
             ))}
           </div>
+
         </div>
       ))}
     </div>
@@ -161,6 +262,7 @@ const DroppableZone = ({ columnName, columns, setColumns, handleDragStart }) => 
 
 
 const App = () => {
+
   const [columnName] = useState([
     'Ideas',
     'Correction of Errors Report',
@@ -182,7 +284,8 @@ const App = () => {
         dueDate: new Date(),
         primaryAnalyst: "",
         secondaryAnalyst: "",
-        attachments: [] 
+        attachments: [],
+        edited: false
       },
       {
         stockName: "Apple",
@@ -190,7 +293,8 @@ const App = () => {
         dueDate: new Date(),
         primaryAnalyst: "",
         secondaryAnalyst: "",
-        attachments: [] 
+        attachments: [],
+        edited: false
       }
     ],
     [],
@@ -211,6 +315,7 @@ const App = () => {
     <div className="container">
       <h1 className='title'>Data Presentation Drag-Drop Effect</h1>
       <p className='process-screen'>Process Screen</p>
+
       <DroppableZone
         columnName={columnName}
         columns={columns}

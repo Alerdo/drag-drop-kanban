@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import './App.css';
 
+
+//This is a "practice file" where I test diffrent concepts that I learn about the React, and Drag-Drop effect
 const DraggableItem = ({ item, index, onDragStart }) => {
   // Item to drag 
   return (
@@ -68,3 +70,4 @@ const App = () => {
 };
 
 export default App;
+

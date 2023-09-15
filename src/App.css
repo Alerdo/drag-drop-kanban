@@ -75,17 +75,38 @@
   min-height: 50px;
   display: flex;
   justify-content: center;
-  padding: 10px;
+  padding: 6px;
 }
 
 .draggable-item {
   background-color: #f0f0f0;
   border: 1px solid #ddd;
-  padding: 15px;
+  padding: 18px;
   margin: 5px;
   font-size: 13px;
   cursor: pointer;
-  width: 60%;
+  width: 70%;
+}
+
+
+/* styling cards */
+.label-input-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.label-input-group label {
+
+  text-align: center;
+}
+.label-input-group input {
+max-width: 55%;
+border: 1px solid blue;
+text-align: center;
+border: none;
+background-color: #ffffff;
 }
 
 
