@@ -1,0 +1,105 @@
+1. Create the Backend API and Node Server in your React Project:
+Firstly, we'll add a backend to your React project.
+
+Initialize Express and Create a Server:
+
+You can create a new directory at the root of your project called server. This is where your server-side code will live.
+
+bash
+Copy code
+mkdir server
+cd server
+npm init -y
+npm install express sequelize pg pg-hstore
+Server Entry Point:
+
+Create a file called server.js in the server directory. This will be the entry point for your server.
+
+
+
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+2. Create the Database:
+use PostgreSQL as the database:
+
+Install PostgreSQL on your machine and start the service.
+
+Create a new database using a GUI tool like pgAdmin or the command line.
+
+3. Create functionality for API calls and interactions with the Database:
+Setup Sequelize:
+
+First, initialize Sequelize in your server directory:
+
+npx sequelize-cli init
+This will create some folders and config files. You need to modify the config/config.json file with your database credentials.
+
+
+Create a Model:
+
+Now, let's create a model for your cards. In your terminal:
+
+
+npx sequelize-cli model:generate --name Card --attributes stock_name:string,entry_date:date,due_date:date,type:string,stage:string,primary_analyst:string,secondary_analyst:string,sedol:integer,isin:integer,link_1:string,link_2:string,link_3:string,link_4:string,link_5:string,other:text
+This will generate the model and a migration file.
+
+Run the Migration:
+ create the appropriate table in your database:
+
+bash
+
+npx sequelize-cli db:migrate
+Setup Routes:
+FRONT END SETUP:
+Frontend State Change Event: When there's a change in your frontend state (e.g., a card is created or moved), we need a function to trigger an HTTP request to the backend which will put records into the database.
+
+Install axios (for making http requests to the api)
+
+
+Create a routes folder inside the server directory. Inside that, create a file named cards.js. Here, you'll define routes to handle CRUD operations for cards.
+
+4. Use Sequelize for Database Interactions:
+In your cards.js routes file:
+
+const express = require('express');
+const router = express.Router();
+const { Card } = require('../models');
+
+// Fetch all cards
+router.get('/', async (req, res) => {
+    try {
+        const cards = await Card.findAll();
+        res.json(cards);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching cards', error: error.message });
+    }
+});
+
+// Add more routes as needed for creating, updating, deleting cards.
+
+module.exports = router;
+In your server.js, you need to import and use these routes:
+
+javascript
+Copy code
+const cardRoutes = require('./routes/cards');
+
+app.use('/api/cards', cardRoutes);
+5. Connect React to the API:
+In your React components, use axios or fetch to interact with these endpoints:
+
+javascript
+
+// Fetch all cards
+fetch('/api/cards')
+    .then(response => response.json())
+    .then(data => {
+        // Use the data (cards) in your React state or wherever needed.
+    });
+
+
+
+So what I need to set funcinality that transmit the change of the state to the api, and than the api throught the routes will handle CRUD operations for the cards usin sequlize .
+

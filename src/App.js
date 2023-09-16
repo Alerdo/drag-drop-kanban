@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import axios from 'axios';  
 import './App.css';
 
 
@@ -26,7 +27,7 @@ const DraggableItem = ({ item, colIndex, index, onDragStart, updateAttachments, 
         }
         reader.readAsDataURL(file);
     }
-};
+  };
 
 
   const handleDeleteAttachment = (attachmentIndex) => {
@@ -50,8 +51,17 @@ const DraggableItem = ({ item, colIndex, index, onDragStart, updateAttachments, 
   }
 
 
-  const handleEditingDone = () => { 
+  const handleEditingDone = async () => { 
     updateItemField(colIndex, index, 'edited', true);
+    try {
+      const response = await axios.post(`http://localhost:3001/api/cards`, item);
+      // Update the card ID or other fields from the response if needed
+      item.id = response.data.id;
+      console.log(item)
+    } catch (error) {
+      console.error("Error creating card:", error);
+      // Handle error (e.g. rollback UI change, show error message, etc.)
+    }
   };
 
   return (
@@ -151,9 +161,9 @@ const DraggableItem = ({ item, colIndex, index, onDragStart, updateAttachments, 
 
 
 
-const DroppableZone = ({ columnName, columns, setColumns, handleDragStart }) => {
+const DroppableZone =  ({ columnName, columns, setColumns, handleDragStart }) => {
 
-  const handleDropOnEmpty = (e, targetColIndex) => { // makes possible do drop the items on empty space on columns 
+  const handleDropOnEmpty = async (e, targetColIndex) => { // makes possible do drop the items on empty space on columns 
     e.preventDefault();
     const [sourceColIndex, sourceItemIndex] = JSON.parse(e.dataTransfer.getData('application/json'));
     const newColumns = [...columns];
@@ -163,6 +173,17 @@ const DroppableZone = ({ columnName, columns, setColumns, handleDragStart }) => 
     newColumns[targetColIndex].push(draggedItem);
 
     setColumns(newColumns);
+
+    try {
+      await axios.put(`http://localhost:3001/api/cards/move`, {
+        sourceColIndex,
+        sourceItemIndex,
+        targetColIndex
+      });
+    } catch (error) {
+      console.error("Error moving card:", error);
+      // Handle error (e.g. rollback UI change, show error message, etc.)
+    }
   };
 
   const handleDropOnExisting = (e, targetColIndex, targetItemIndex) => { //I will make the padding of the last element take all the height so this handler will be working instead of the .items handler
@@ -180,7 +201,7 @@ const DroppableZone = ({ columnName, columns, setColumns, handleDragStart }) => 
 
  
 
-  const handleAddNewCard = (colIndex) => {
+  const handleAddNewCard = async (colIndex) => {
     const newColumns = [...columns];
     const newCard = {
       stockName: "",
@@ -193,20 +214,27 @@ const DroppableZone = ({ columnName, columns, setColumns, handleDragStart }) => 
     };
     newColumns[colIndex].push(newCard);
     setColumns(newColumns);
+    
   };
-  
 
   const handleDragOver = (e) => {
     e.preventDefault();
   };
 
 
-  const updateAttachments = (colIndex, itemIndex, newAttachments) => {
+  const updateAttachments = async (colIndex, itemIndex, newAttachments) => {
     setColumns(prevColumns => {
         const updatedColumns = [...prevColumns];
         updatedColumns[colIndex][itemIndex].attachments = newAttachments;
         return updatedColumns;
     });
+
+    try {
+      await axios.put(`http://localhost:3001/api/cards/${columns[colIndex][itemIndex].id}/attachments`, newAttachments);
+    } catch (error) {
+      console.error("Error updating attachments:", error);
+      // Handle error (e.g. rollback UI change, show error message, etc.)
+    }
 };
 
 
@@ -224,7 +252,7 @@ const updateItemField = (colIndex, itemIndex, field, value) => { //used to chang
       {columns.map((colItems, colIndex) => ( //Iterating over all columns 
         <div key={colIndex} className="column">
           <div className="column-name">{(colIndex + 1) + ". "}{columnName[colIndex]}</div>
-          {colIndex === 0 && ( <button onClick={() => handleAddNewCard(colIndex)}>+</button>)}  {/*Making sure this button shows for the first column only*/}
+          {colIndex === 0 && ( <button onClick={() => handleAddNewCard(colIndex) }>+</button>)}  {/*Making sure this button shows for the first column only*/}
           
           
           <div 
@@ -310,7 +338,102 @@ const App = () => {
   const handleDragStart = (e, colIndex, index) => {
     e.dataTransfer.setData('application/json', JSON.stringify([colIndex, index]));
   };
-
+ 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/api/cards');
+        const cards = response.data;
+        // console.log(cards)
+        // console.log(cards[0])
+        // const innerArray = cards[0] //cards[0] because the response of the api calls comes as follows: [[ [],[]...] ]
+        const newColumns = [[], [], [], [], [], [], [], [], []];
+        
+        cards.forEach((card) => {
+          const {
+            due_date,
+            primary_analyst,
+            secondary_analyst,
+            stock_name,
+            type,
+            createdAt,
+            link_1,
+            link_2,
+            link_3,
+            link_4,
+            link_5
+          } = card;
+    
+          
+          // Extract and format attachments
+      const attachments = [];
+      [link_1, link_2, link_3, link_4, link_5].forEach(link => {
+        if (link) {
+          attachments.push(link);
+        }
+      });
+          console.log(attachments)
+    
+          // Copy of the card format  that can be created to display the ones from the database
+          const formattedCard = {
+            stockName: stock_name || '',
+            createdDate: new Date(createdAt),
+            dueDate: due_date ? new Date(due_date) : null,
+            primaryAnalyst: primary_analyst || '',
+            secondaryAnalyst: secondary_analyst || '',
+            attachments: attachments, 
+            edited: true //these cards are already edited since they are in the database
+          };
+        
+        
+          // // Categorize the formattedCard into different columns based on its type
+           switch (type) {
+             case "New Ideas":
+               newColumns[0].push(formattedCard);
+               break;
+             case 'Correction of Errors Report':
+               newColumns[1].push(formattedCard);
+               break;
+             case 'Short Note':
+               newColumns[2].push(formattedCard);
+               break;
+             case 'Q&A':
+               newColumns[3].push(formattedCard);
+               break;
+             case 'Model':
+               newColumns[4].push(formattedCard);
+               break;
+             case 'Pre Mortem':
+               newColumns[5].push(formattedCard);
+               break;
+            case 'Full Note':
+               newColumns[6].push(formattedCard);
+               break;
+             case 'Buy List':
+               newColumns[7].push(formattedCard);
+               break;
+             case 'Fail List':
+               newColumns[8].push(formattedCard);
+               break;
+             default:
+              newColumns[0].push(formattedCard);
+               break;
+           }
+        });
+        
+        console.log(newColumns)
+        // Update the "columns" state with the categorized data
+        setColumns(newColumns);
+      } catch (error) {
+        console.error("Error fetching cards:", error);
+      }
+    };
+  
+    // Call fetchData to fetch and categorize the data when the component mounts
+    fetchData();
+  }, []); // Empty dependency array means this effect runs once when the component mounts
+  
+  
   return (
     <div className="container">
       <h1 className='title'>Data Presentation Drag-Drop Effect</h1>
