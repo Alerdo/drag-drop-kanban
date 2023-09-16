@@ -50,7 +50,7 @@ const DraggableItem = ({ item, colIndex, index, onDragStart, updateAttachments, 
     return yyyy + '-' + mm + '-' + dd;
   }
 
-
+  //Create funcionality to get all cards when component mounts and make a post request when creating a new component
   const handleEditingDone = async () => { 
     updateItemField(colIndex, index, 'edited', true);
     try {
@@ -63,7 +63,7 @@ const DraggableItem = ({ item, colIndex, index, onDragStart, updateAttachments, 
       // Handle error (e.g. rollback UI change, show error message, etc.)
     }
   };
-
+ 
   return (
     <div className="draggable-item" draggable onDragStart={(e) => onDragStart(e, colIndex, index)}>
       <div className="label-input-group stock-name">
