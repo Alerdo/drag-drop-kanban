@@ -50,7 +50,7 @@ const DraggableItem = ({ item, colIndex, index, onDragStart, updateAttachments, 
     return yyyy + '-' + mm + '-' + dd;
   }
 
-  //Create funcionality to get all cards when component mounts and make a post request when creating a new component
+  //Create funcionality to get all cards when component mounts  and make a post request when creating a new component
   const handleEditingDone = async () => { 
     updateItemField(colIndex, index, 'edited', true);
     try {
