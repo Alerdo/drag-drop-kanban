@@ -94,7 +94,7 @@ router.post('/api/cards', async (req, res) => {
             due_date: new Date(dueDate),
             type: 'New Ideas',
             // Here I'm adding a placeholder for the stage. You need to provide this information.
-            stage: 'STAGE_HERE', 
+            stage: 'New Ideas', 
             primary_analyst: primaryAnalyst,
             secondary_analyst: secondaryAnalyst,
             sedol: generateRandomInt(8),
@@ -122,17 +122,23 @@ router.post('/api/cards', async (req, res) => {
 // Move a card to a different stage
 router.put('/api/cards/move', async (req, res) => {
     try {
-        const { stockName, stage } = req.body;
-        const updatedCard = await Card.update({ stage }, { where: { stock_name: stockName } });
-        if (updatedCard[0] > 0) {  // If at least one row was updated
+
+        const { cardId, targetColumnName } = req.body;
+        const updatedCard = await Card.update({ stage: targetColumnName }, { where: { id: cardId } });
+        
+        console.log("Route /api/cards/move hit");
+        console.log(req.body);
+
+        if (updatedCard[0] > 0) {
             res.json({ message: "Card successfully moved" });
         } else {
-            res.status(404).json({ message: "Card not found" });
+            res.status(404).json({ message: "Card not found, server" });
         }
     } catch (error) {
         res.status(500).json({ message: "Error moving card", error });
     }
 });
+
 
 // Update card's lane
 router.put('/api/cards/:stockName/stage', async (req, res) => {

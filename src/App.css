@@ -1,15 +1,56 @@
 
-.title  {
- padding-left: 400px;
 
+
+/* Styling for the <h1> tag */
+.title {
+  font-family: 'Georgia', Times, 'Times New Roman', serif;
+  font-size: 1.5em;
+  color: #2c3e50;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  width: 100vw;
+  /* border: 1px solid red; */
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  margin-top: 5px;
 }
 
 .process-screen {
-  padding-left: 600px;
+  font-family: 'Georgia', Times, 'Times New Roman', serif;
+  font-size: 1em;
+  color: #ffffff; /* White text for contrast against the teal background */
+  background-color: #009688; /* Teal background color */
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  width: auto; 
+  padding: 8px 24px; 
+  border: 1px solid #00675b; /* Darker teal for the border */
+  border-radius: 5px; 
+  box-sizing: border-box;
+  cursor: pointer; 
+  transition: background-color 0.3s ease, transform 0.3s ease; 
+
+  /* Hover effects */
+  &:hover {
+    background-color: #00675b; /* Darker teal on hover */
+    transform: scale(1.05); 
+  }
+
+  /* Focus styling for accessibility */
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 150, 136, 0.5); /* Slightly transparent teal for focus glow */
+  }
 }
 
+
+
+
 .container {
-  border: 1px solid purple;
+ 
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -17,10 +58,17 @@
   width: fit-content;
 }
 
+.text-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  max-width: 100vw;
+  
+}
 .columns-container {
   display: flex;
   justify-content: center;
-  border: 1px solid green;
   width: auto;
 }
 
@@ -31,7 +79,7 @@
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start; /* The column name will stay at the top , becase of flex start , will do the same for empty columns because they .items will have same height*/
-  border: 1px solid blue;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3), 0px 4px 8px rgba(0, 0, 0, 0.2);
   margin: 5px;
   flex: 1;
   max-height: fit-content;
@@ -48,20 +96,18 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  border: 1px solid rgb(255, 255, 0);
+
   margin: 5px;
   height: auto;
   flex: 1; /* this is nesecasry for the empty items array  */
 }
 
 
-.items > :last-child { /* This is just an example to put a min width on each column .. so the handler(handleDropOnExisting ) for the item will work instead of the handler for the column*/
-  /* padding-bottom: 120%; */
-  border: 1px solid red;
-  margin-bottom: 0px;
-}
+
+
+
 .column-name {
-  background-color: rgb(42, 174, 39);
+  background-color: #036194;
   color: white;
   width: 100%;
   text-align: center;
@@ -79,13 +125,24 @@
 }
 
 .draggable-item {
-  background-color: #f0f0f0;
-  border: 1px solid #ddd;
+  background-color: #d0eef2; /* light blue color */
+  border-left: 5px solid #0077b6; /* thicker blue border on the left */
+  border-radius: 8px; /* rounded borders */
   padding: 18px;
   margin: 5px;
   font-size: 13px;
+  color: black; /* text color */
   cursor: pointer;
   width: 70%;
+}
+
+
+/* Making the stock name have a bigger font */
+.draggable-item .stock-name label,
+.draggable-item .stock-name input {
+  font-size: 16px;
+  font-weight: bold;
+  max-width: 70%;
 }
 
 
@@ -95,6 +152,7 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 8px;
+  /* border: 1px solid red; */
 }
 
 .label-input-group label {
