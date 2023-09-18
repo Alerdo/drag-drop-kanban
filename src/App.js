@@ -50,7 +50,7 @@ const DraggableItem = ({ item, colIndex, index, onDragStart, updateAttachments, 
     return yyyy + '-' + mm + '-' + dd;
   }
 
-  //Create funcionality to get all cards when component mounts  and make a post request when creating a new component
+  //Create funcionality to get all cards when component mounts  gitand make a post request when creating a new component
   const handleEditingDone = async () => { 
     updateItemField(colIndex, index, 'edited', true);
     try {
@@ -175,18 +175,26 @@ const DroppableZone =  ({ columnName, columns, setColumns, handleDragStart }) =>
     setColumns(newColumns);
 
     try {
-      await axios.put(`http://localhost:3001/api/cards/move`, {
-        sourceColIndex,
-        sourceItemIndex,
-        targetColIndex
+      const cardId = draggedItem.id; // assuming each card has a unique 'id' property
+      const targetColumnName = columnName[targetColIndex];
+      
+      const response = await axios.put(`http://localhost:3001/api/cards/move`, {
+        cardId,
+        targetColumnName
       });
+
+   
+
     } catch (error) {
-      console.error("Error moving card:", error);
-      // Handle error (e.g. rollback UI change, show error message, etc.)
+      console.error("Error while moving card:", error);
+      // const cardId = draggedItem.id; // assuming each card has a unique 'id' property
+      // const targetColumnName = columnName[targetColIndex];
+      // console.log(cardId, targetColumnName)
     }
+
   };
 
-  const handleDropOnExisting = (e, targetColIndex, targetItemIndex) => { //I will make the padding of the last element take all the height so this handler will be working instead of the .items handler
+  const handleDropOnExisting = async (e, targetColIndex, targetItemIndex) => { //I will make the padding of the last element take all the height so this handler will be working instead of the .items handler
     e.preventDefault();
     e.stopPropagation(); 
     const [sourceColIndex, sourceItemIndex] = JSON.parse(e.dataTransfer.getData('application/json'));
@@ -197,6 +205,24 @@ const DroppableZone =  ({ columnName, columns, setColumns, handleDragStart }) =>
     newColumns[targetColIndex].splice(targetItemIndex, 0, draggedItem);
 
     setColumns(newColumns);
+
+      try {
+      const cardId = draggedItem.id; // assuming each card has a unique 'id' property
+      const targetColumnName = columnName[targetColIndex];
+      
+      const response = await axios.put(`http://localhost:3001/api/cards/move`, {
+        cardId,
+        targetColumnName
+      });
+
+   
+
+    } catch (error) {
+      console.error("Error while moving card:", error);
+      // const cardId = draggedItem.id; // assuming each card has a unique 'id' property
+      // const targetColumnName = columnName[targetColIndex];
+      // console.log(cardId, targetColumnName)
+    }
   };
 
  
@@ -351,11 +377,12 @@ const App = () => {
         
         cards.forEach((card) => {
           const {
+            id,
             due_date,
             primary_analyst,
             secondary_analyst,
             stock_name,
-            type,
+            stage,
             createdAt,
             link_1,
             link_2,
@@ -364,7 +391,7 @@ const App = () => {
             link_5
           } = card;
     
-          
+         
           // Extract and format attachments
       const attachments = [];
       [link_1, link_2, link_3, link_4, link_5].forEach(link => {
@@ -372,10 +399,11 @@ const App = () => {
           attachments.push(link);
         }
       });
-          console.log(attachments)
+          // console.log(attachments)
     
           // Copy of the card format  that can be created to display the ones from the database
           const formattedCard = {
+            id: id,
             stockName: stock_name || '',
             createdDate: new Date(createdAt),
             dueDate: due_date ? new Date(due_date) : null,
@@ -387,7 +415,7 @@ const App = () => {
         
         
           // // Categorize the formattedCard into different columns based on its type
-           switch (type) {
+           switch (stage) {
              case "New Ideas":
                newColumns[0].push(formattedCard);
                break;
@@ -436,8 +464,11 @@ const App = () => {
   
   return (
     <div className="container">
+
+      <div className='text-container'>
       <h1 className='title'>Data Presentation Drag-Drop Effect</h1>
       <p className='process-screen'>Process Screen</p>
+      </div>
 
       <DroppableZone
         columnName={columnName}
