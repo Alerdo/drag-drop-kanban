@@ -170,3 +170,143 @@ background-color: #ffffff;
 
 
 
+
+/* Add this CSS to your component's CSS file or style tag */
+.icon-group {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  margin-top: 10px; /* Adjust the margin as needed */
+}
+
+.save-icon {
+  
+  color: white; /* Text color for the save button */
+  border: none;
+  padding: 5px 10px;
+  margin-left: 5px; /* Adjust the margin as needed */
+  cursor: pointer;
+}
+
+.create-delete-icon {
+  width: 100%;
+  display: flex;
+  justify-content: space-between; /* This will push children elements to the edges */
+  align-items: center;
+  border: none;
+  margin-left: 5px;
+  margin-right: 10px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+
+.create-delete-icon .deleteInfo {
+  margin-left: auto; /* This will push the .deleteInfo to the right */
+  display: flex;
+  align-items: center;
+}
+/* Add this CSS to your component's CSS file or style tag */
+.save-icon button {
+  width: fit-content;
+  color: white;
+  background-color: #4CAF50; /* Green color for the save button */
+  border: none;
+  font-size: smaller;
+  padding: 5px 10px;
+  margin-left: 5px; /* Adjust the margin as needed */
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-radius: 5px;
+  border: 1px solid #357A38;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.create-delete-icon .deleteButton {
+  color: white;
+  background: red;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(244, 66, 66, 0.2);
+}
+
+
+
+
+.deleteInfo {
+
+  margin: 0;
+}
+
+.save-icon button:hover,
+.delete-icon button:hover {
+  transform: scale(1.05); /* Add a slight zoom effect on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a hover shadow effect */
+}
+
+
+
+/* Style the "Done Editing" button */
+.don-editing-button {
+  background-color: #007BFF; /* Blue color for the button */
+  color: white; /* Text color */
+  border: none;
+  padding: 10px 20px;
+
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-radius: 5px;
+  border: 1px solid #0056b3;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.don-editing-button:hover {
+  background-color: #0056b3; /* Darker blue color on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Style the "Show Attached Files" button with minimalist styling */
+.show-attached-files-button {
+  background-color: transparent; /* Keep the background transparent */
+  color: #007BFF; /* Primary blue color for the button text */
+  border: 1px solid #007BFF; /* Add a border with the same blue color */
+  border-radius: 4px; /* Slightly rounded corners for the button */
+  padding: 5px 10px;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: all 0.2s; /* Transition for all properties for a smooth effect */
+  display: inline-flex; /* Use flexbox for aligning text and arrow */
+  align-items: center; /* Align the items vertically */
+  justify-content: center; /* Center the content horizontally */
+  gap: 5px; /* Add space between the text and the arrow */
+  font-weight: 500; /* Slightly bolder font for the text */
+}
+
+.show-attached-files-button:hover {
+  color: #0056b3; /* Darker blue color on hover */
+  border-color: #0056b3; /* Darker border color on hover */
+  text-decoration: none; /* Remove text underline on hover */
+}
+
+/* Optional: use ::after pseudo-element for the dropdown arrow */
+.show-attached-files-button::after {
+  content: '▼'; /* Unicode down arrow */
+  font-size: 0.8em; /* Smaller font size for the arrow */
+  transition: transform 0.2s; /* Smooth transition for rotation */
+}
+
+/* Rotate the arrow when attachments are shown */
+.show-attached-files-button.showing::after {
+  transform: rotate(180deg); /* Flip the arrow to point upwards */
+}
+
+
+.success-message {
+  color: green;
+  font-weight: bold;
+  margin-top: 10px;
+}

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Card } = require('../models');  // Assuming Sequelize model's name is "Card"
+const { Card } = require('../models'); 
 router.use(express.json());
 
 
@@ -10,21 +10,7 @@ router.use(express.json());
 router.get('/api/cards', async (req, res) => {
     try {
         const cards = await Card.findAll();
-        // const columns = [[]]; // Initialize an array for the first column
-
-        // // Split the cards into columns
-        // cards.forEach((card, index) => {
-        //     // Assuming you have a 'columnIndex' property in your card model
-        //     const columnIndex = card.columnIndex || 0;
-
-        //     // Initialize the column array if it doesn't exist
-        //     if (!columns[columnIndex]) {
-        //         columns[columnIndex] = [];
-        //     }
-
-        //     // Push the card into the appropriate column
-        //     columns[columnIndex].push(card);
-        // });
+        
 
         res.json(cards);
     } catch (error) {
@@ -32,31 +18,6 @@ router.get('/api/cards', async (req, res) => {
     }
 });
 
-
-
-router.post('/api/cards/move', async (req, res) => {
-    const { sourceColIndex, sourceItemIndex, targetColIndex } = req.body;
-
-    // We'll use these indices to determine stockName and its new stage.
-    // Assuming columns are in a certain order corresponding to stages.
-    const stages = ["Backlog", "In Progress", "Completed"];  // Modify this based on your app's exact columns.
-    const sourceStage = stages[sourceColIndex];
-    const targetStage = stages[targetColIndex];
-
-    // Fetch the card using source stage and item index
-    // This assumes you have an order in your database.
-    const cardToMove = await Card.findAll({ where: { stage: sourceStage }, offset: sourceItemIndex, limit: 1 });
-
-    if (!cardToMove) {
-        return res.status(404).json({ error: "Card not found" });
-    }
-
-    // Update the card's stage
-    cardToMove.stage = targetStage;
-    await cardToMove.save();
-
-    res.json({ success: true, message: "Card moved successfully" });
-});
 
 router.post('/api/cards', async (req, res) => {
     console.log(req.body);
@@ -140,16 +101,6 @@ router.put('/api/cards/move', async (req, res) => {
 });
 
 
-// Update card's lane
-router.put('/api/cards/:stockName/stage', async (req, res) => {
-    try {
-        const { stage } = req.body;
-        const updatedCard = await Card.update({ stage }, { where: { stock_name: req.params.stockName } });
-        res.json(updatedCard);
-    } catch (error) {
-        res.status(500).json({ message: "Error updating card's stage", error });
-    }
-});
 
 // Add attachments
 router.put('/api/cards/:stockName/attachments', async (req, res) => {
@@ -163,16 +114,58 @@ router.put('/api/cards/:stockName/attachments', async (req, res) => {
 });
 
 // Update secondary analyst
-router.put('/api/cards/:stockName/secondaryAnalyst', async (req, res) => {
+router.put('/api/cards/:cardId/secondaryAnalyst', async (req, res) => {
     try {
-        const { secondary_analyst } = req.body;
-        const updatedCard = await Card.update({ secondary_analyst }, { where: { stock_name: req.params.stockName } });
-        res.json(updatedCard);
+        const { cardId } = req.params; // Extract the card ID from the URL parameter
+        const { secondary_analyst } = req.body; // Extract the new secondary analyst name from the request body
+
+        // Update the secondary analyst name for the specified card
+        const updatedCard = await Card.update(
+            { secondary_analyst },
+            { where: { id: cardId } }
+        );
+
+        if (updatedCard[0] > 0) {
+            res.json({ message: "Secondary analyst name updated successfully" });
+        } else {
+            res.status(404).json({ message: "Card not found" });
+        }
     } catch (error) {
-        res.status(500).json({ message: "Error updating secondary analyst", error });
+        res.status(500).json({ message: "Error updating secondary analyst name", error });
     }
 });
 
+
+// Delete a card by ID
+
+
+// DELETE route to delete a card by ID
+// DELETE route to delete a card by ID
+router.delete('/api/cards/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+  
+      // Check if the card with the specified ID exists
+      const cardToDelete = await Card.findByPk(id);
+  
+      if (!cardToDelete) {
+        return res.status(404).json({ error: 'Card not found' });
+      }
+  
+      // Delete the card
+      await cardToDelete.destroy();
+  
+      // Respond with a success message
+      res.json({ message: 'Card deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting card:', error);
+      // Handle the error and respond with an appropriate JSON error message
+      res.status(500).json({ error: 'Error deleting card' });
+    }
+  });
+  
+  
+    
 
 // Helper function to generate random integers
 function generateRandomInt(length) {
